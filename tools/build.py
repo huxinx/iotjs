@@ -152,6 +152,7 @@ options = {
     'checktest': True,
     'jerry-heaplimit': 81,
     'tuv' : False,
+    'lto' : False,
 }
 
 boolean_opts = ['buildlib',
@@ -159,10 +160,14 @@ boolean_opts = ['buildlib',
                 'tidy',
                 'jerry-memstats',
                 'checktest',
-                'tuv']
+                'tuv',
+                'lto']
 
 def opt_build_type():
     return options['buildtype']
+
+def opt_lto():
+    return options['lto']
 
 def opt_build_lib():
     return options['buildlib']
@@ -238,7 +243,7 @@ def parse_args():
         elif opt == 'builddir':
             options[opt] = val
         elif opt == 'target-arch':
-            if val.lower() in ['x86_64', 'i686', 'arm']:
+            if val.lower() in ['i686', 'x86_64', 'arm']:
                 options[opt] = val.lower()
         elif opt == 'target-os':
             if val.lower() in ['linux', 'darwin', 'nuttx']:
@@ -486,8 +491,11 @@ def build_libjerry():
         # prepare cmake command line option.
         jerry_cmake_opt = [JERRY_ROOT]
 
-        # set lto off.
-        jerry_cmake_opt.append('-DENABLE_LTO=OFF')
+        # set lto
+        if opt_lto():
+            jerry_cmake_opt.append('-DENABLE_LTO=ON')
+        else :
+            jerry_cmake_opt.append('-DENABLE_LTO=OFF')
 
         # tool chain file.
         jerry_cmake_opt.append('-DCMAKE_TOOLCHAIN_FILE=' +
@@ -635,6 +643,10 @@ def build_iotjs():
     # IoT.js is using cmake.
     # prepare cmake command line option.
     iotjs_cmake_opt = [ROOT, "-DCMAKE_BUILD_TYPE=" + build_type]
+
+    #set LTO
+    if opt_lto():
+        iotjs_cmake_opt.append('-DENABLE_LTO=ON')
 
     # set toolchain file.
     iotjs_cmake_opt.append('-DCMAKE_TOOLCHAIN_FILE=' +

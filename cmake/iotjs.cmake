@@ -17,6 +17,18 @@ cmake_minimum_required(VERSION 2.8)
 file(GLOB LIB_IOTJS_SRC ${SRC_ROOT}/*.cpp
                         ${SRC_ROOT}/platform/${PLATFORM_DESCRIPT}/*.cpp)
 
+if("${ENABLE_LTO}" STREQUAL "ON")
+    set(CFLAGS "${CFLAGS} -flto")
+  # Use gcc-ar and gcc-ranlib to support LTO
+   get_filename_component(PATH_TO_GCC ${CMAKE_C_COMPILER} REALPATH)
+   get_filename_component(DIRECTORY_GCC ${PATH_TO_GCC} DIRECTORY)
+   get_filename_component(FILE_NAME_GCC ${PATH_TO_GCC} NAME)
+   string(REPLACE "gcc" "gcc-ar" CMAKE_AR ${FILE_NAME_GCC})
+   string(REPLACE "gcc" "gcc-ranlib" CMAKE_RANLIB ${FILE_NAME_GCC})
+   set(CMAKE_AR ${DIRECTORY_GCC}/${CMAKE_AR})
+   set(CMAKE_RANLIB ${DIRECTORY_GCC}/${CMAKE_RANLIB})
+endif()
+
 set(LIB_IOTJS_CFLAGS ${CFLAGS})
 set(LIB_IOTJS_INCDIR ${TARGET_INC}
                      ${INC_ROOT}
